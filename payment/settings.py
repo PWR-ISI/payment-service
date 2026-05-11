@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ackexx%$h9-g5)m-g=uvcbzw08%eh+9@0$n2$ys(i0m9^2264b'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ackexx%$h9-g5)m-g=uvcbzw08%eh+9@0$n2$ys(i0m9^2264b')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -37,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'payment.apps.PaymentConfig',
 ]
 
 MIDDLEWARE = [
@@ -72,12 +79,25 @@ WSGI_APPLICATION = 'payment.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+_db_host = os.getenv('DJANGO_DB_HOST')
+if _db_host:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DJANGO_DB_NAME', 'payment_db'),
+            'USER': os.getenv('DJANGO_DB_USER', 'payment_user'),
+            'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', ''),
+            'HOST': _db_host,
+            'PORT': os.getenv('DJANGO_DB_PORT', '5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -115,3 +135,84 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.OrderingFilter',
+    ],
+}
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'payment-service.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'payment': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
+
+# AWS SQS Configuration
+AWS_REGION = os.getenv('AWS_REGION', 'eu-central-1')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+SQS_PAYMENT_SUCCESS_QUEUE_URL = os.getenv('AWS_SQS_PAYMENT_SUCCESS_QUEUE_URL')
+SQS_PAYMENT_FAILED_QUEUE_URL = os.getenv('AWS_SQS_PAYMENT_FAILED_QUEUE_URL')
+
+# PayU Configuration
+PAYU_MERCHANT_ID = os.getenv('PAYU_MERCHANT_ID')
+PAYU_API_KEY = os.getenv('PAYU_API_KEY')
+PAYU_OAUTH_CLIENT_ID = os.getenv('PAYU_OAUTH_CLIENT_ID')
+PAYU_OAUTH_CLIENT_SECRET = os.getenv('PAYU_OAUTH_CLIENT_SECRET')
+PAYU_SANDBOX_MODE = os.getenv('PAYU_SANDBOX_MODE', 'true').lower() == 'true'
+PAYU_BASE_URL = 'https://secure.snd.payu.com' if PAYU_SANDBOX_MODE else 'https://secure.payu.com'
+
+# Application Configuration
+BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
+
+# Create logs directory if not exists
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+

@@ -1,0 +1,16 @@
+Numer,Miesiąc,Rok,CVV,Wynik 3DS,Zachowanie
+4444333322221111,12,29,123,domyślny,Autoryzacja pozytywna.
+5434021016824014,12,29,123,domyślny,Autoryzacja pozytywna.
+5598614816563766,12,29,123,domyślny,Autoryzacja pozytywna.
+5000105018126595,12,29,123,domyślny,Autoryzacja negatywna.
+4000398284360,12,29,123,domyślny,Autoryzacja negatywna.
+4245757666349685,12,29,123,Challenge,Autoryzacja pozytywna.
+5150030090350186,12,29,123,3DS Method i udane uwierzytelnienie typu frictionless,Autoryzacja pozytywna.
+4012001037141120,12,29,123,Metoda 3DS i challenge,Autoryzacja pozytywna.
+5100052384536834,12,29,123,Zwrócone parametry challenge, jeśli obiekt sdk został wysłany w zamówieniu.,Autoryzacja pozytywna.
+5100052384536818,02,32,123,Challenge / jeśli nie wykonano uwierzytelnienia, zwraca soft decline (SSD).,Autoryzacja pozytywna.
+5521455186577727,12,29,123,Nieudane uwierzytelnienie typu frictionless.,Brak autoryzacji.
+5405860937270285,12,29,123,domyślny,50% szans na udaną autoryzację.
+4532598021104999,12,29,123,domyślny,Udana autoryzacja tylko na kwotę poniżej 1000 groszy.
+4210836393742163,12,29,123,Challenge,Udana autoryzacja tylko na kwotę poniżej 1000 groszy.
+5436062405627681,12,29,123,Challange,Dla kwoty powyżej 300 groszy parametr iframeAllowed przyjmuje wartość false.

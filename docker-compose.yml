@@ -2,7 +2,9 @@ services:
   app:
     build: .
     container_name: payment-service
-    command: gunicorn payment.wsgi:application --bind 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             gunicorn payment.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120"
     volumes:
       - .:/app
     env_file:
@@ -15,7 +17,8 @@ services:
     ports:
       - "8007:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:15-alpine
@@ -27,6 +30,11 @@ services:
       POSTGRES_PASSWORD: othersecretpassword
     volumes:
       - postgres-payment-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payment_user -d payment_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres-payment-data:
