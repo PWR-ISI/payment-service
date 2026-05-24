@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-ackexx%$h9-g5)m-g=u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,host.docker.internal').split(',')
 
 
 # Application definition
@@ -215,4 +215,5 @@ BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
 
 # Create logs directory if not exists
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
 
